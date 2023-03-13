@@ -8,8 +8,36 @@ import numpy as np
 from torch_geometric.utils import to_dense_adj
 import torch.nn.functional as F
 
+class ChannelAttentionModule(nn.Module):
+    def __init__(self,n_feature,conv_type,fc_scale,droput):
+        super(SpatialAttentionModule,self).__init__()
+        self.conv_type = conv_type
+        self.n_feature = n_feature
 
-class SAG_channel(torch.nn.Module):
+        self.fc1 = nn.Linear(2,2*fc_scale)
+        self.drop = nn.Dropout(droput)
+        self.fc2 = nn.Linear(2*fc_scale,1)
+
+    def FC(self,h):
+        h=self.fc1(h)
+        h=self.drop(h)
+        h=h.tanh()
+        h=self.fc2(h)
+        h = h.sigmoid()
+        return h
+
+    def forward(self,x,edge_index):
+        # x : N*Channel*Cluster
+        N,C,P = x.shape
+        E = edge_index.shape[1]
+        avgout = torch.mean(x,dim=2)
+        maxout = torch.max(x,dim=2)[0]
+        out_avg_max = torch.stack([avgout,maxout],dim=2)
+        o = self.FC(out_avg_max).squeeze(2).sigmoid()
+        return o,out_avg_max
+
+
+class SAG(torch.nn.Module):
     def __init__(self,n_feature=35,hidden_dim=16,SAG_ratio=0.3, n_class=2,drop_out_ratio=0.3,CONV_TYPE='GCN',act_op='relu',before_pooling_layer=1,after_pooling_layer=1,num_K=2):
         super().__init__()
 
@@ -196,6 +224,8 @@ class SAG(torch.nn.Module):
         self.after_pooling_conv_layers_list = []
         assert before_pooling_layer>0
 
+        self.spatialAtt = ChannelAttentionModule(n_feature,self.conv_type)
+
         if self.conv_type=='GCN':
             self.before_pooling_conv_layers_list.append(GCNConv(n_feature,hidden_dim))
         elif self.conv_type =='SAGE':
@@ -327,6 +357,11 @@ class SAG(torch.nn.Module):
         S = self.alpha_p*dis_p+self.alpha_f*dis_f # N * (N*pool_ratio)
         h = torch.mm(S.transpose(0,1),h_1) 
         origin_dis = torch.argmax(S,dim=1)
+        
+
+        channel_A,avg_max = self.channelAtt((x_origin.unsqueeze(2))*(S.unsqueeze(1)),edge_index_origin) # channel_Attention
+
+        h = h + torch.mm(S.transpose(0,1),channel_A*x_origin) 
            
         h_2 = self.H_GNN(h,edge_index,edge_weight,self.after_pooling_conv_layers)    
         h_emb = h_2

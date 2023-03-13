@@ -9,7 +9,7 @@ from torch_geometric.utils import to_dense_adj
 import torch.nn.functional as F
 
 
-class SAG_channel(torch.nn.Module):
+class SAG(torch.nn.Module):
     def __init__(self,n_feature=35,hidden_dim=16,SAG_ratio=0.3, n_class=2,drop_out_ratio=0.3,CONV_TYPE='GCN',act_op='relu',before_pooling_layer=1,after_pooling_layer=1,num_K=2):
         super().__init__()
 
