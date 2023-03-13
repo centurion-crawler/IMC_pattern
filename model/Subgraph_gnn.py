@@ -297,7 +297,7 @@ class SAG(torch.nn.Module):
         h=self.fc2(h)
         h = F.softmax(h,dim=-1)
 
-    def H_GNN(self,x,edge_index,edge_weight,conv_layers):
+    def H_GNN(self,x,edge_index,edge_weight,conv_layers): # Hierarchical graph convolution
         h_ = None
         for i,c in enumerate(conv_layers):
             if self.conv_type in ['GCN','SAGE']:
