@@ -8,6 +8,33 @@ import numpy as np
 from torch_geometric.utils import to_dense_adj
 import torch.nn.functional as F
 
+class ChannelAttentionModule(nn.Module):
+    def __init__(self,n_feature,conv_type,fc_scale,droput):
+        super(SpatialAttentionModule,self).__init__()
+        self.conv_type = conv_type
+        self.n_feature = n_feature
+
+        self.fc1 = nn.Linear(2,2*fc_scale)
+        self.drop = nn.Dropout(droput)
+        self.fc2 = nn.Linear(2*fc_scale,1)
+
+    def FC(self,h):
+        h=self.fc1(h)
+        h=self.drop(h)
+        h=h.tanh()
+        h=self.fc2(h)
+        h = h.sigmoid()
+        return h
+
+    def forward(self,x,edge_index):
+        # x : N*Channel*Cluster
+        N,C,P = x.shape
+        E = edge_index.shape[1]
+        avgout = torch.mean(x,dim=2)
+        maxout = torch.max(x,dim=2)[0]
+        out_avg_max = torch.stack([avgout,maxout],dim=2)
+        o = self.FC(o).squeeze(2)
+        return o,out_avg_max
 
 class SAG_channel(torch.nn.Module):
     def __init__(self,n_feature=35,hidden_dim=16,SAG_ratio=0.3, n_class=2,drop_out_ratio=0.3,CONV_TYPE='GCN',act_op='relu',before_pooling_layer=1,after_pooling_layer=1,num_K=2):
