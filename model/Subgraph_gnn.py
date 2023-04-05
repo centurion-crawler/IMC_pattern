@@ -15,14 +15,21 @@ class ChannelAttentionModule(nn.Module):
         self.n_feature = n_feature
 
         self.fc1 = nn.Linear(2,2*fc_scale)
-        self.drop = nn.Dropout(droput)
-        self.fc2 = nn.Linear(2*fc_scale,1)
+        self.drop1 = nn.Dropout(droput)
 
-    def FC(self,h):
+        self.fc2 = nn.Linear(2,2*fc_scale)
+        self.drop2 = nn.Dropout(droput)
+
+        self.fc3 = nn.Linear(2*fc_scale,1)
+    def FC1(self,h):
         h=self.fc1(h)
-        h=self.drop(h)
+        h=self.drop1(h)
         h=h.tanh()
+        return h
+
+    def FC2(self.h):
         h=self.fc2(h)
+        h=self.drop2(h)
         h = h.sigmoid()
         return h
 
@@ -33,8 +40,10 @@ class ChannelAttentionModule(nn.Module):
         avgout = torch.mean(x,dim=2)
         maxout = torch.max(x,dim=2)[0]
         out_avg_max = torch.stack([avgout,maxout],dim=2)
-        o = self.FC(o).squeeze(2)
-        return o,out_avg_max
+
+        A = self.fc3(self.FC1(out_avg_max).mul(self.FC2(out_avg_max)))
+
+        return A,out_avg_max
 
 class SAG_channel(torch.nn.Module):
     def __init__(self,n_feature=35,hidden_dim=16,SAG_ratio=0.3, n_class=2,drop_out_ratio=0.3,CONV_TYPE='GCN',act_op='relu',before_pooling_layer=1,after_pooling_layer=1,num_K=2):
