@@ -3,15 +3,13 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--subgraph_path', default='../log_res/sagpool/Tuning_hd_256_convtype_GCN_sag_r_0.015625_lsim_0.5_ldiff_0.01_act_op_relu_K_2_bl_1_al_1/subgraph', type=str,
                     help='subgraph_path')
-parser.add_argument('--channel_path', default='../log_res/sagpool/Tuning_hd_256_convtype_GCN_sag_r_0.015625_lsim_0.5_ldiff_0.01_act_op_relu_K_2_bl_1_al_1/subgraph', type=str,
-                    help='channel_path')
 parser.add_argument('--graph_path', default='../data/melanoma/gnn_data', type=str,
                     help='graph_path')
-parser.add_argument('--visualize_path', default='../data/melanoma/vis_cell_type', type=str,
+parser.add_argument('--visualize_cell_path', default='../data/melanoma/vis_cell_type', type=str,
                     help='')
 parser.add_argument('--res_path', default='../results/sagpool/Tuning_hd_256_convtype_GCN_sag_r_0.015625_lsim_0.5_ldiff_0.01_act_op_relu_K_2_bl_1_al_1', type=str,
                     help='res_path')         
-parser.add_argument('--gpu_id', default='7', type=str,
+parser.add_argument('--gpu_id', default='0', type=str,
                     help='')
 parser.add_argument('--bg_color', default=190, type=int,
                     help='')
@@ -24,12 +22,11 @@ import numpy as np
 from torch_geometric.data import Data
 
 subgraph_dir = config.subgraph_path
-channel_dir = config.channel_path
 graph_dir = config.graph_path
-imc_dir = config.visualize_path
+imc_dir = config.visualize_cell_path
 
 ROI_heatmap_path = os.path.join(config.res_path,'roi_heatmap')
-node_mask_path = os.path.join(config.res_path,'node_mask_with_channel_attention')
+node_mask_path = os.path.join(config.res_path,'node_mask_with_attention')
 highlighted_heatmap = os.path.join(config.res_path,'highlighted_area')
 
 os.makedirs('resluts',exist_ok=True)
@@ -65,7 +62,6 @@ for pkl in os.listdir(subgraph_dir):
     subgraph = torch.load(os.path.join(subgraph_dir,pkl))
     graph = torch.load(os.path.join(graph_dir,pkl))
     imc = cv2.imread(os.path.join(imc_dir,pkl[:-4]+'.png'))
-    channel_A = torch.load(os.path.join(channel_dir,pkl)).channel_A.detach().cpu()
 
     p_ = []
     for i in range(len(subgraph.pos_pool_center)):
@@ -88,7 +84,7 @@ for pkl in os.listdir(subgraph_dir):
             node_masks_List.append(i)
             draft_h = cv2.circle(draft,(int(graph.pos[i][1]),int(graph.pos[i][0])),4,cell_color,-1) 
     node_mask = torch.LongTensor(node_masks_List)
-    node_mask_data_pyg = Data(node_mask=node_mask,channel_A = channel_A)
+    node_mask_data_pyg = Data(node_mask=node_mask)
 
     torch.save(node_mask_data_pyg,os.path.join(node_mask_path,pkl))
     cv2.imwrite(os.path.join(os.path.join(ROI_heatmap_path,pkl[:-4]+'.png'),draft)

@@ -1,4 +1,5 @@
 import torch 
+
 def log_print(f_name,str_text):
     with open(f_name,'a') as f:
         f.write(str(str_text)+'\n')

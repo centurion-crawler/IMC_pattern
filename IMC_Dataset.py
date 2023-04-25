@@ -9,13 +9,18 @@ from sklearn.model_selection import train_test_split
 class IMC_Dataset(Dataset):
 
     def __init__(self,fold_index,x_path="../data/melanoma/gnn_data",y_path="../data/melanoma/label_and_fold/response_label_dict.pkl",fold_path="../data/melanoma/label_and_fold/leave_one_fold_for_response.pkl"):
+        '''
+            Args:
+                fold_index: which fold now 
+                x_path: Data path encapsulated by torch_geometric Data
+                y_path: Path of Label dict 
+                fold path: Path of static fold split 
+        '''
         self.x_path=x_path
         self.y_path=y_path
         folds_file=joblib.load(fold_path)
         if 'all' in fold_index:
             self.graphs = list(set(folds_file[fold_index.replace('all','train')])|set(folds_file[fold_index.replace('all','val')])|set(folds_file[fold_index.replace('all','test')]))
-        # elif 'train' in fold_index:
-        #     self.graphs = list(set(folds_file[fold_index.replace('train','val')])|set(folds_file[fold_index])) used if no need valid 
         else:
             self.graphs=folds_file[fold_index]
         self.labels=joblib.load(y_path)
@@ -43,7 +48,7 @@ def get_dataloader(index=0,seed=0):
     test_set=IMC_Dataset(fold_index="fold{}_test".format(index))
     all_set=IMC_Dataset(fold_index="fold{}_all".format(index))
     dataloader={}
-    dataloader["train"]=DataLoader(train_set,batch_size=1,num_workers=0,drop_last=False,shuffle=True)
+    dataloader["train"]=DataLoader(train_set,batch_size=1,num_workers=0,drop_last=False,shuffle=True) # Dataloader for enumerate
     dataloader["all"]=DataLoader(all_set,batch_size=1,num_workers=0,drop_last=False,shuffle=True)
     dataloader["val"]=DataLoader(val_set,batch_size=1,num_workers=0,drop_last=False,shuffle=True)
     dataloader["test"]=DataLoader(test_set,batch_size=1,num_workers=0,drop_last=False)

@@ -4,7 +4,7 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 
-def lsim_loss_cal(representations,label,T=0.7):
+def lsim_loss_cal(representations,label,T=0.7): # Contrastive Learning Similarity Loss
     n = label.shape[0]
     
     similarity_matrix = F.cosine_similarity(representations.unsqueeze(0),representations.unsqueeze(1),dim=2)
@@ -17,7 +17,6 @@ def lsim_loss_cal(representations,label,T=0.7):
     
     similarity_matrix = torch.exp(similarity_matrix/T)
     
-    #similarity_matrix = similarity_matrix_eig_0
     similarity_matrix = similarity_matrix*mask_eig_0
     
     sim = mask*similarity_matrix

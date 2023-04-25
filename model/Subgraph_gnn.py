@@ -13,11 +13,10 @@ class SAG(torch.nn.Module):
     def __init__(self,n_feature=35,hidden_dim=16,SAG_ratio=0.3, n_class=2,drop_out_ratio=0.3,CONV_TYPE='GCN',act_op='relu',before_pooling_layer=1,after_pooling_layer=1,num_K=2):
         super().__init__()
 
-        self.alpha_p = 0.5
-        self.alpha_f = 0.5
+        self.alpha_p = 0.5 # weight of position for subgraph assignment
+        self.alpha_f = 0.5 # weight of feature for subgraph assignment
         self.k = num_K
         self.conv_type = CONV_TYPE
-        
         self.before_pooling_conv_layers_list = []
         self.after_pooling_conv_layers_list = []
         assert before_pooling_layer>0
@@ -94,7 +93,7 @@ class SAG(torch.nn.Module):
             h = op(h)
         return h
 
-    def get_dis_matrix(self,pos,pos_):
+    def get_dis_matrix(self,pos,pos_): # similarity between positions
         x_dis = pos[:,0:1].repeat(1,len(pos_)) - pos_[:,0:1].view(1,-1).repeat(len(pos),1)
         y_dis = pos[:,1:2].repeat(1,len(pos_)) - pos_[:,1:2].view(1,-1).repeat(len(pos),1)
         dis = torch.sqrt(x_dis **2 +y_dis **2)
@@ -103,7 +102,7 @@ class SAG(torch.nn.Module):
         dis_norm_score = 2/(dis_norm+1)-1
         return dis_norm_score  # [N*C]
     
-    def get_fea_matrix(self,fea,fea_):
+    def get_fea_matrix(self,fea,fea_): # similarity between features
         f_dis = None 
         for i in range(fea.shape[1]):
             if f_dis is None:
@@ -116,14 +115,14 @@ class SAG(torch.nn.Module):
         f_dis_norm_score = 2/(f_dis_norm+1)-1
         return f_dis_norm_score # [N*C]
     
-    def MLP(self,h):
+    def FC(self,h):
         h=self.fc1(h)
         h=self.drop1(h)
         h=h.tanh()
         h=self.fc2(h)
         h = F.softmax(h,dim=-1)
 
-    def H_GNN(self,x,edge_index,edge_weight,conv_layers): # Hierarchical graph convolution
+    def GNNS(self,x,edge_index,edge_weight,conv_layers): # Hierarchical graph convolution
         h_ = None
         for i,c in enumerate(conv_layers):
             if self.conv_type in ['GCN','SAGE']:
@@ -140,21 +139,22 @@ class SAG(torch.nn.Module):
         
         return h_ 
 
+
     def forward(self,x_origin,edge_index,edge_weight,pos):
         edge_index_origin = edge_index
         h = x_origin
         
-        h_1 = self.H_GNN(x_origin,edge_index_origin,edge_weight,self.before_pooling_conv_layers)
-        h, edge_index, edge_weight, batch, perm, score=self.pool(h_1,edge_index,edge_attr = edge_weight)
+        h_1 = self.GNNS(x_origin,edge_index_origin,edge_weight,self.before_pooling_conv_layers) # Multi-layers GNN
+        h, edge_index, edge_weight, batch, perm, score=self.pool(h_1,edge_index,edge_attr = edge_weight) 
         pos_ = pos[perm]
 
         dis_p = self.get_dis_matrix(pos,pos_).detach()
         dis_f = self.get_fea_matrix(h_1, h_1[perm]).detach()
         S = self.alpha_p*dis_p+self.alpha_f*dis_f # N * (N*pool_ratio)
         h = torch.mm(S.transpose(0,1),h_1) 
-        origin_dis = torch.argmax(S,dim=1)
+        origin_dis = torch.argmax(S,dim=1) # points -> subgraph assignment
            
-        h_2 = self.H_GNN(h,edge_index,edge_weight,self.after_pooling_conv_layers)    
+        h_2 = self.GNNS(h,edge_index,edge_weight,self.after_pooling_conv_layers)  
         h_emb = h_2
         n_h = h_2.size(0)
         batch = edge_index.new_zeros((n_h,1)).flatten()
@@ -163,10 +163,10 @@ class SAG(torch.nn.Module):
         gate = gate.squeeze(1) 
 
         vals,indices = torch.topk(gate,len(gate))
-        vals_k,indices_k = torch.topk(gate,self.k)
+        vals_k,indices_k = torch.topk(gate,min(self.k,len(gate))) # Extreme K will cause the number of subgraphs to be exceeded! 
         h_f = self.norm(h_3)
         fea_top = h_f
-        h_f = self.MLP(h_f)
+        h_f = self.FC(h_f)
 
         in_indices = torch.zeros(len(indices),dtype=torch.int).cuda()
         for i in range(indices.max()+1):

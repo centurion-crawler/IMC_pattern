@@ -1,9 +1,8 @@
 
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.metrics import classification_report,accuracy_score,roc_curve,auc,roc_auc_score
-from collections import Counter
-from IMC_Dataset import get_dataloader
+from sklearn.metrics import classification_report,accuracy_score,roc_curve,auc,roc_auc_score,confusion_matrix,f1_score,precision_recall_fscore_support
+
 
 def optimal_thresh(fpr, tpr, thresholds, p=0):
     loss = (fpr - tpr) - p * tpr / (fpr + tpr + 1)
@@ -16,14 +15,15 @@ def five_scores(labels, predictions):
     auc_value = roc_auc_score(labels, predictions)
     this_class_label = np.array(predictions)
     this_class_label[this_class_label>=threshold_optimal] = 1
-    this_class_label[this_class_label<threshold_optimal] = 0
+    this_class_label[this_class_label<threshold_optimal] = 0 # threshold chosen 
     predictions = this_class_label
 
-    # precision, recall, fscore, _ = precision_recall_fscore_support(bag_labels, bag_predictions, average='binary')
+    # precision, recall, fscore, _ = precision_recall_fscore_support(labels, predictions, average='binary')
     acc=accuracy_score(labels, predictions)
     # return accuracy, auc_value, precision, recall, fscore
     return acc, auc_value
-def return_auc(target_array,possibility_array):
+
+def return_auc(target_array,possibility_array): # Multi-class AUC
     enc = OneHotEncoder()
     target_onehot = enc.fit_transform(target_array.unsqueeze(1))
     target_onehot = target_onehot.toarray()

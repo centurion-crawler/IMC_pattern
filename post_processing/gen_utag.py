@@ -1,3 +1,5 @@
+import os
+import argparse
 from heapq import _heapify_max
 from torch_geometric.data import Data
 import torch
@@ -9,7 +11,6 @@ from sklearn.manifold import Isomap,LocallyLinearEmbedding,SpectralEmbedding,TSN
 import pandas as pd
 import numpy as np
 import cv2
-import os
 from PIL import Image
 import warnings
 import imageio
@@ -17,11 +18,20 @@ from utag import *
 import pickle
 warnings.filterwarnings("ignore")
 
-data_root = '../data/melanoma'
+parser = argparse.ArgumentParser()
+parser.add_argument('--data_root', default='../data/melanoma', type=str,
+                    help='config file path')
+parser.add_argument('--res_utag_name', default='utag_results_dist10_leiden.h5ad', type=str,
+                    help='res_utag_name')
+config = parser.parse_args()
 
+
+data_root = config.data_root
 os.makedirs(os.path.join(data_root,'adata'),exist_ok=True)
 ROI_graph = os.path.join(data_root,'gnn_data')
-reults_path= os.path.join(data_root,'adata','utag_results_dist10_leiden03.h5ad')
+reults_path= os.path.join(data_root,'adata',config.res_utag_name)
+
+
 def read_path(each):
     graph=torch.load(os.path.join(ROI_graph,each),map_location=torch.device('cpu'))
     pos=graph.pos
