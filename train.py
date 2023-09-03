@@ -1,7 +1,6 @@
 from ast import Num
 import os
 import argparse
-import setproctitle
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--sag_r', default=64, type=int,
@@ -56,11 +55,11 @@ parser.add_argument('--ckpt_path', default='checkpoint', type=str,
                     help='')  
 parser.add_argument('--res_path', default='log_res', type=str,
                     help='')  
-parser.add_argument('--gnn_path', default='../data/melanoma/gnn_data', type=str,
+parser.add_argument('--gnn_path', default='./data/melanoma/gnn_data', type=str,
                     help='')  
-parser.add_argument('--label_path', default='../data/melanoma/label_and_fold/response_label_dict.pkl', type=str,
+parser.add_argument('--label_path', default='./data/melanoma/label_and_fold/response_label_dict.pkl', type=str,
                     help='')  
-parser.add_argument('--fold_path', default='../data/melanoma/label_and_fold/leave_one_fold_for_response.pkl', type=str,
+parser.add_argument('--fold_path', default='./data/melanoma/label_and_fold/leave_one_fold_for_response.pkl', type=str,
                     help='')  
 
 
@@ -70,10 +69,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu_id
 import torch
 torch.set_num_threads(1)
 import torch.nn as nn
-from torch.nn import Linear,Dropout,LayerNorm
-from torch_geometric.nn import GCNConv,SAGEConv,GATConv,TransformerConv,GINConv,TAGConv,SAGPooling,global_mean_pool,GlobalAttention_gated
 import numpy as np
-from torch_geometric.utils import to_dense_adj
 import torch.nn.functional as F
 from torch_geometric.data import Data
 from model import SAG
@@ -82,7 +78,6 @@ from metrics import *
 from utils import *
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import classification_report,accuracy_score,roc_curve,auc,roc_auc_score,confusion_matrix,f1_score
-from collections import Counter
 from IMC_Dataset import get_dataloader
 
 device=torch.device("cuda:0")
@@ -120,9 +115,9 @@ for ki in range(config.Ks,config.Ke,config.K_step):
                             model=SAG(hidden_dim=hd,SAG_ratio=sag_r,CONV_TYPE=conv_type,act_op=config.act_op,before_pooling_layer=config.before_layer,after_pooling_layer=config.after_layer,num_K=ki,n_class=config.class_num).to(device)
                             
                             if t==0 and fi==0:
-                                torch.save(model.state_dict(),os.path.join(config.init_model_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}.pth'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer))
+                                torch.save(model.state_dict(),os.path.join(config.init_model_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}.pth'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer)))
                             else:
-                                model.load_state_dict(torch.load(os.path.join(config.init_model_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}.pth'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer)))
+                                model.load_state_dict(torch.load(os.path.join(config.init_model_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}.pth'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer))))
                             model.to(device)
                             loss_evaluation=torch.nn.CrossEntropyLoss().to(device)
                             optimizer=torch.optim.Adam(model.parameters(),lr=config.lr,weight_decay=config.weight_decay)

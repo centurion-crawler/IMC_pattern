@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 
 class IMC_Dataset(Dataset):
 
-    def __init__(self,fold_index,x_path="../data/melanoma/gnn_data",y_path="../data/melanoma/label_and_fold/response_label_dict.pkl",fold_path="../data/melanoma/label_and_fold/leave_one_fold_for_response.pkl"):
+    def __init__(self,fold_index,x_path="./data/melanoma/gnn_data",y_path="./data/melanoma/label_and_fold/response_label_dict.pkl",fold_path="./data/melanoma/label_and_fold/leave_one_fold_for_response.pkl"):
         '''
             Args:
                 fold_index: which fold now 
