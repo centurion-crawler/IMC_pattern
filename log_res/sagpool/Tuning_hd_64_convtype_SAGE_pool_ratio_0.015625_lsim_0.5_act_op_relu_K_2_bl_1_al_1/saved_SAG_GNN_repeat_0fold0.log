@@ -1,0 +1,65 @@
+hidden_dim:64 SAG Pooling_ratio:0.015625 conv_type:SAGE drop_out:0.3
+=======================FOLD 1=======================
+----------Epoch 1----------
+Train on 114 samples, loss: 1.8668 sim loss: 1.2037 
+test train on 114 sample, train_acc: 0.6930 train_auc:0.7756 
+test val on 28 sample, val_acc: 0.6071 val_auc:0.4696 
+----------Epoch 2----------
+Train on 114 samples, loss: 1.8128 sim loss: 1.2237 
+test train on 114 sample, train_acc: 0.7368 train_auc:0.8127 
+test val on 28 sample, val_acc: 0.8571 val_auc:0.5826 
+----------Epoch 3----------
+Train on 114 samples, loss: 1.7827 sim loss: 1.2208 
+test train on 114 sample, train_acc: 0.7807 train_auc:0.8421 
+test val on 28 sample, val_acc: 0.8929 val_auc:0.6609 
+----------Epoch 4----------
+Train on 114 samples, loss: 1.6250 sim loss: 1.0911 
+test train on 114 sample, train_acc: 0.7982 train_auc:0.8653 
+test val on 28 sample, val_acc: 0.8929 val_auc:0.6783 
+----------Epoch 5----------
+Train on 114 samples, loss: 1.5629 sim loss: 1.0802 
+test train on 114 sample, train_acc: 0.8158 train_auc:0.8861 
+test val on 28 sample, val_acc: 0.9286 val_auc:0.7130 
+----------Epoch 6----------
+Train on 114 samples, loss: 1.6121 sim loss: 1.1627 
+test train on 114 sample, train_acc: 0.8070 train_auc:0.8934 
+test val on 28 sample, val_acc: 0.9286 val_auc:0.7217 
+----------Epoch 7----------
+Train on 114 samples, loss: 1.5631 sim loss: 1.1621 
+test train on 114 sample, train_acc: 0.8158 train_auc:0.9138 
+test val on 28 sample, val_acc: 0.9286 val_auc:0.7565 
+----------Epoch 8----------
+Train on 114 samples, loss: 1.5449 sim loss: 1.1533 
+test train on 114 sample, train_acc: 0.8509 train_auc:0.9366 
+test val on 28 sample, val_acc: 0.9286 val_auc:0.7913 
+----------Epoch 9----------
+Train on 114 samples, loss: 1.3859 sim loss: 1.0278 
+test train on 114 sample, train_acc: 0.8596 train_auc:0.9436 
+test val on 28 sample, val_acc: 0.9286 val_auc:0.8000 
+----------Epoch 10----------
+Train on 114 samples, loss: 1.4265 sim loss: 1.0918 
+test train on 114 sample, train_acc: 0.9123 train_auc:0.9588 
+test val on 28 sample, val_acc: 0.9286 val_auc:0.8261 
+----------Epoch 11----------
+Train on 114 samples, loss: 1.4078 sim loss: 1.1021 
+test train on 114 sample, train_acc: 0.9123 train_auc:0.9681 
+test val on 28 sample, val_acc: 0.9286 val_auc:0.8000 
+----------Epoch 12----------
+Train on 114 samples, loss: 1.3328 sim loss: 1.0470 
+test train on 114 sample, train_acc: 0.9211 train_auc:0.9720 
+test val on 28 sample, val_acc: 0.9286 val_auc:0.8087 
+saving....
+----------Epoch 13----------
+Train on 114 samples, loss: 1.3079 sim loss: 1.0266 
+test train on 114 sample, train_acc: 0.9298 train_auc:0.9785 
+test val on 28 sample, val_acc: 0.9286 val_auc:0.8000 
+----------Epoch 14----------
+Train on 114 samples, loss: 1.2672 sim loss: 1.0348 
+test train on 114 sample, train_acc: 0.9386 train_auc:0.9799 
+test val on 28 sample, val_acc: 0.9286 val_auc:0.7913 
+----------Epoch 15----------
+Train on 114 samples, loss: 1.2932 sim loss: 1.0659 
+test train on 114 sample, train_acc: 0.9561 train_auc:0.9841 
+test val on 28 sample, val_acc: 0.9286 val_auc:0.8000 
+----------Epoch 16----------
+Train on 114 samples, loss: 1.2546 sim loss: 1.0504 

@@ -4,6 +4,7 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 
+device=torch.device("cuda:0")
 def lsim_loss_cal(representations,label,T=0.7): # Contrastive Learning Similarity Loss
     n = label.shape[0]
     

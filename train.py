@@ -5,7 +5,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--sag_r', default=64, type=int,
                     help='config file path')
-parser.add_argument('--gpu_id', default='7', type=str,
+parser.add_argument('--gpu_id', default='1', type=str,
                     help='')
 parser.add_argument('--fold_s', default=0, type=int,
                     help='')
@@ -49,7 +49,7 @@ parser.add_argument('--Ke', default=10, type=int,
                     help='')
 parser.add_argument('--K_step', default=2, type=int,
                     help='')  
-parser.add_argument('--ckpt_save_epoch', default=25, type=int,
+parser.add_argument('--ckpt_save_epoch', default=10, type=int,
                     help='')                                       
 parser.add_argument('--ckpt_path', default='checkpoint', type=str,
                     help='')  
@@ -61,7 +61,8 @@ parser.add_argument('--label_path', default='./data/melanoma/label_and_fold/resp
                     help='')  
 parser.add_argument('--fold_path', default='./data/melanoma/label_and_fold/leave_one_fold_for_response.pkl', type=str,
                     help='')  
-
+parser.add_argument('--init_model_path', default='./data/melanoma/init_models', type=str,
+                    help='')  
 
 config = parser.parse_args()
 os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu_id
@@ -74,7 +75,7 @@ import torch.nn.functional as F
 from torch_geometric.data import Data
 from model import SAG
 from loss import *
-from metrics import * 
+from metric import * 
 from utils import *
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import classification_report,accuracy_score,roc_curve,auc,roc_auc_score,confusion_matrix,f1_score
@@ -95,6 +96,7 @@ for ki in range(config.Ks,config.Ke,config.K_step):
                     trial_test_fold_mean = []
                     os.makedirs(config.res_path,exist_ok=True)
                     os.makedirs(config.ckpt_path,exist_ok=True)
+                    os.makedirs(config.init_model_path,exist_ok=True)
                     os.makedirs(os.path.join(config.res_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer)),exist_ok=True)
                     os.makedirs(os.path.join(config.res_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}/subgraph'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer)),exist_ok=True)
                     os.makedirs(os.path.join(config.ckpt_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer)),exist_ok=True)
@@ -104,20 +106,19 @@ for ki in range(config.Ks,config.Ke,config.K_step):
 
                         for fi in range(config.fold_s,config.fold_e):
                             f_name=os.path.join(config.res_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer)+'/saved_SAG_GNN_repeat_'+str(t)+'fold'+str(fi)+'.log')
-                            model_pathname = os.path.join(config.ckpt_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}_leave_one.pth'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer))
+                            model_pathname = os.path.join(config.ckpt_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer),'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}_leave_one_fold_{}.pth'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer,fi))
 
                             f_ = open(f_name,'w')
                             f_.truncate()
                             log_print(f_name,'hidden_dim:{} SAG Pooling_ratio:{} conv_type:{} drop_out:{}'.format(hd,sag_r,conv_type,drop_out_r))
                             log_print(f_name,"=======================FOLD {}=======================".format(fi+1))
-                            dataloader = get_dataloader(index=fi,x_path = config.gnn_path,y_path = config.label_path, fold_path = config.fold_path)
-
+                            dataloader = get_dataloader(index=fi)
                             model=SAG(hidden_dim=hd,SAG_ratio=sag_r,CONV_TYPE=conv_type,act_op=config.act_op,before_pooling_layer=config.before_layer,after_pooling_layer=config.after_layer,num_K=ki,n_class=config.class_num).to(device)
                             
                             if t==0 and fi==0:
-                                torch.save(model.state_dict(),os.path.join(config.init_model_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}.pth'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer)))
+                                torch.save(model.state_dict(),os.path.join(config.init_model_path,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}.pth'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer)))
                             else:
-                                model.load_state_dict(torch.load(os.path.join(config.init_model_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}.pth'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer))))
+                                model.load_state_dict(torch.load(os.path.join(config.init_model_path,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}.pth'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer))))
                             model.to(device)
                             loss_evaluation=torch.nn.CrossEntropyLoss().to(device)
                             optimizer=torch.optim.Adam(model.parameters(),lr=config.lr,weight_decay=config.weight_decay)
@@ -143,8 +144,7 @@ for ki in range(config.Ks,config.Ke,config.K_step):
                                 batch_num_sim=0
                                 for data,graph_path in dataloader["train"]:
                                     graph=data.to(device)
-                                    m+=1
-    #                                    
+                                    m+=1                                
                                     out,mask_points,h_embs,vals,fea_top,pos_,fea_topk=model(graph.x,graph.edge_index,graph.edge_weight,graph.pos)
                                     out_data = Data(mask_points=mask_points,sub_embs = h_embs,sub_score = vals,pos_pool_center=pos_)
 
@@ -155,6 +155,7 @@ for ki in range(config.Ks,config.Ke,config.K_step):
                                         label_batch_k = graph.y.repeat(fea_topk.shape[0])
                                         label_batch = graph.y
                                     else:
+                                        
                                         outs = torch.cat([outs,out])
                                         fea_tops = torch.cat([fea_tops,fea_top])
                                         fea_topks = torch.cat([fea_topks,fea_topk])
@@ -191,7 +192,7 @@ for ki in range(config.Ks,config.Ke,config.K_step):
                                     y_trains.append(graph.y.item())
                                     out,_,_,_,_,_,_ = model(graph.x,graph.edge_index,graph.edge_weight,graph.pos)
                                     y_train_preds.append(out.max(1)[1].item())
-                                    y_train_pred_scores.append(out[0,1].item())
+                                    y_train_pred_scores.append(F.softmax(out,dim=-1)[0,1].item())
                                 train_acc,train_auc = five_scores(y_trains, y_train_pred_scores)
                                 log_print(f_name,"test train on {} sample, train_acc: {:.4f} train_auc:{:.4f} ".format(len(y_trains),train_acc,train_auc))
 
@@ -202,7 +203,7 @@ for ki in range(config.Ks,config.Ke,config.K_step):
                                     y_vals.append(graph.y.item())
                                     out,_,_,_,_,_,_ = model(graph.x,graph.edge_index,graph.edge_weight,graph.pos)
                                     y_val_preds.append(out.max(1)[1].item())
-                                    y_val_pred_scores.append(out[0,1].item())
+                                    y_val_pred_scores.append(F.softmax(out,dim=-1)[0,1].item())
                                 val_acc,val_auc = five_scores(y_vals, y_val_pred_scores)
                                 log_print(f_name,"test val on {} sample, val_acc: {:.4f} val_auc:{:.4f} ".format(len(y_vals),val_acc,val_auc))
 

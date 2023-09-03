@@ -1,15 +1,15 @@
 import os
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--subgraph_path', default='../log_res/sagpool/Tuning_hd_256_convtype_GCN_sag_r_0.015625_lsim_0.5_ldiff_0.01_act_op_relu_K_2_bl_1_al_1/subgraph', type=str,
+parser.add_argument('--subgraph_path', default='../log_res/sagpool/Tuning_hd_64_convtype_SAGE_pool_ratio_0.015625_lsim_0.5_act_op_relu_K_2_bl_1_al_1/subgraph', type=str,
                     help='subgraph_path')
 parser.add_argument('--graph_path', default='../data/melanoma/gnn_data', type=str,
                     help='graph_path')
-parser.add_argument('--visualize_cell_path', default='../data/melanoma/vis_cell_type', type=str,
+parser.add_argument('--visualize_path', default='../data/melanoma/vis_cell_type', type=str,
                     help='')
-parser.add_argument('--res_path', default='../results/sagpool/Tuning_hd_256_convtype_GCN_sag_r_0.015625_lsim_0.5_ldiff_0.01_act_op_relu_K_2_bl_1_al_1', type=str,
+parser.add_argument('--res_path', default='../results/sagpool/Tuning_hd_64_convtype_SAGE_pool_ratio_0.015625_lsim_0.5_act_op_relu_K_2_bl_1_al_1', type=str,
                     help='res_path')         
-parser.add_argument('--gpu_id', default='0', type=str,
+parser.add_argument('--gpu_id', default='4', type=str,
                     help='')
 parser.add_argument('--bg_color', default=190, type=int,
                     help='')
@@ -23,20 +23,21 @@ from torch_geometric.data import Data
 
 subgraph_dir = config.subgraph_path
 graph_dir = config.graph_path
-imc_dir = config.visualize_cell_path
+imc_dir = config.visualize_path
 
 ROI_heatmap_path = os.path.join(config.res_path,'roi_heatmap')
-node_mask_path = os.path.join(config.res_path,'node_mask_with_attention')
 highlighted_heatmap = os.path.join(config.res_path,'highlighted_area')
+node_mask_path = os.path.join(config.res_path,'node_mask')
 
-os.makedirs('resluts',exist_ok=True)
+os.makedirs('../results',exist_ok=True)
 os.makedirs(ROI_heatmap_path,exist_ok=True)
 os.makedirs(node_mask_path,exist_ok=True)
 os.makedirs(highlighted_heatmap,exist_ok=True)
 
 
 def Jet(score_color):
-    assert score_color<=1.0 and score_color>=0
+    # print(score_color)
+    assert score_color<=255 and score_color>=0
     if score_color<=31:
         return (int(128+4*score_color),0,0)
     elif score_color==32:
@@ -66,9 +67,13 @@ for pkl in os.listdir(subgraph_dir):
     p_ = []
     for i in range(len(subgraph.pos_pool_center)):
         p_.append((subgraph.sub_score[i]/len(torch.where(subgraph.mask_points==i)[0])**(1/2)).item()) # Assign weights to each node of the subgraph
+        # p_.append(subgraph.sub_score[i])
+        
     p = torch.Tensor(p_)
     subgraph.sub_score = p 
+    
     scores = p[subgraph.mask_points.long()]
+    # print(subgraph.mask_points)
 
     draft_mask_h = np.ones((imc.shape[0],imc.shape[1]))*bg_color
     draft_h = cv2.merge([draft_mask_h,draft_mask_h,draft_mask_h])
@@ -87,8 +92,8 @@ for pkl in os.listdir(subgraph_dir):
     node_mask_data_pyg = Data(node_mask=node_mask)
 
     torch.save(node_mask_data_pyg,os.path.join(node_mask_path,pkl))
-    cv2.imwrite(os.path.join(os.path.join(ROI_heatmap_path,pkl[:-4]+'.png'),draft)
-    cv2.imwrite(os.path.join(os.path.join(highlighted_heatmap,pkl[:-4]+'.png'),draft_h)
+    cv2.imwrite(os.path.join(ROI_heatmap_path,pkl[:-4]+'.png'),draft)
+    cv2.imwrite(os.path.join(highlighted_heatmap,pkl[:-4]+'.png'),draft_h)
 
     
     

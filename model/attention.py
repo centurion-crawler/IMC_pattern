@@ -2,7 +2,7 @@ import torch
 from torch_scatter import scatter_add
 from torch_geometric.utils import softmax
 import torch.nn as nn
-from utils import reset
+from .inits import reset
 
 class GlobalAttention_gated(torch.nn.Module):
     r"""Global soft attention layer from the `"Gated Graph Sequence Neural
@@ -32,6 +32,7 @@ class GlobalAttention_gated(torch.nn.Module):
         super().__init__()
         self.gate_nn = gate_nn
         self.nn = nn
+
         self.reset_parameters()
 
     def reset_parameters(self):

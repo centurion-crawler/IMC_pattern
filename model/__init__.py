@@ -1,5 +1,5 @@
-from Subgraph_gnn import *
+from .Subgraph_gnn import *
 
 __all__ = ['SAG',
-           'SAG_channel',
+           'Channel_SAG',
            'ChannelAttentionModule']

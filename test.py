@@ -25,6 +25,8 @@ parser.add_argument('--before_layer', default=1, type=int,
                     help='')
 parser.add_argument('--after_layer', default=1, type=int,
                     help='')
+parser.add_argument('--class_num', default=2, type=int,
+                    help='')
 parser.add_argument('--epoch', default=45, type=int,
                     help='')
 parser.add_argument('--early_stop', default=20, type=int,
@@ -72,13 +74,13 @@ import torch.nn.functional as F
 from torch_geometric.data import Data
 from model import SAG
 from loss import *
-from metrics import * 
+from metric import * 
 from utils import *
 from IMC_Dataset import get_dataloader
 from sklearn.metrics import classification_report,accuracy_score,roc_curve,auc,roc_auc_score,confusion_matrix,f1_score
 
 device=torch.device("cuda:0")
-
+lsim_loss_lambda = config.lsim_loss
 
 for ki in range(config.Ks,config.Ke,config.K_step):
     for drop_out_r in [config.dropout]:
@@ -89,8 +91,9 @@ for ki in range(config.Ks,config.Ke,config.K_step):
                     for t in range(config.repeat_s,config.repeat_e):
                         for fi in range(config.fold_s,config.fold_e):
                             f_name=os.path.join(config.res_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer)+'/saved_SAG_GNN_repeat_'+str(t)+'fold'+str(fi)+'.log')
-                            model_pathname = os.path.join(config.ckpt_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}_leave_one.pth'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer))
-                            dataloader = get_dataloader(index=fi,x_path = config.gnn_path,y_path = config.label_path, fold_path = config.fold_path)
+                            model_pathname = os.path.join(config.ckpt_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer),'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}_leave_one_fold_{}.pth'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer,fi))
+                            print(model_pathname)
+                            dataloader = get_dataloader(index=fi)
                             model=SAG(hidden_dim=hd,SAG_ratio=sag_r,CONV_TYPE=conv_type,act_op=config.act_op,before_pooling_layer=config.before_layer,after_pooling_layer=config.after_layer,num_K=ki,n_class=config.class_num).to(device)
                             model.to(device)
                             
@@ -99,7 +102,7 @@ for ki in range(config.Ks,config.Ke,config.K_step):
                             model.to(device)
 
                             model.eval()
-                            y_tests,y_preds,y_pred_scores=[],[]
+                            y_tests,y_preds,y_pred_scores=[],[],[]
                             for data,graph_path in dataloader["test"]:
                                 graph=data.to(device)
                                 y_tests.append(graph.y.item())

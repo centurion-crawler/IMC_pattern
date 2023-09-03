@@ -7,7 +7,7 @@ def log_print(f_name,str_text):
 def save_model(model,value_dict,epoch,fold,pathname,f_name):
     log_print(f_name,'saving....')
     s_model=model.to('cpu')
-    k = value_dict.keys()[0]
+    k = list(value_dict.keys())[0]
     v = value_dict[k]
     state = {
         'net': s_model.state_dict(),
