@@ -58,9 +58,9 @@ parser.add_argument('--res_path', default='log_res', type=str,
 parser.add_argument('--gnn_path', default='./data/melanoma/gnn_data', type=str,
                     help='')  
 parser.add_argument('--label_path', default='./data/melanoma/label_and_fold/response_label_dict.pkl', type=str,
-                    help='')  
+                    help='label of all samples in the dataset ')  
 parser.add_argument('--fold_path', default='./data/melanoma/label_and_fold/leave_one_fold_for_response.pkl', type=str,
-                    help='')  
+                    help='Specify the sample distribution to use for each fold')  
 
 
 config = parser.parse_args()
@@ -93,7 +93,7 @@ for ki in range(config.Ks,config.Ke,config.K_step):
                             f_name=os.path.join(config.res_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer)+'/saved_SAG_GNN_repeat_'+str(t)+'fold'+str(fi)+'.log')
                             model_pathname = os.path.join(config.ckpt_path,config.pool_type,'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer),'Tuning_hd_{}_convtype_{}_pool_ratio_{}_lsim_{}_act_op_{}_K_{}_bl_{}_al_{}_leave_one_fold_{}.pth'.format(hd,conv_type,sag_r,lsim_loss_lambda,config.act_op,ki,config.before_layer,config.after_layer,fi))
                             print(model_pathname)
-                            dataloader = get_dataloader(index=fi)
+                            dataloader = get_dataloader(index=fi,x_path=config.gnn_path,y_path=config.label_path,fold_path=config.fold_path)
                             model=SAG(hidden_dim=hd,SAG_ratio=sag_r,CONV_TYPE=conv_type,act_op=config.act_op,before_pooling_layer=config.before_layer,after_pooling_layer=config.after_layer,num_K=ki,n_class=config.class_num).to(device)
                             model.to(device)
                             

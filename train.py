@@ -58,9 +58,9 @@ parser.add_argument('--res_path', default='log_res', type=str,
 parser.add_argument('--gnn_path', default='./data/melanoma/gnn_data', type=str,
                     help='')  
 parser.add_argument('--label_path', default='./data/melanoma/label_and_fold/response_label_dict.pkl', type=str,
-                    help='')  
+                    help='label of all samples in the dataset ')  
 parser.add_argument('--fold_path', default='./data/melanoma/label_and_fold/leave_one_fold_for_response.pkl', type=str,
-                    help='')  
+                    help='Specify the sample distribution to use for each fold')  
 parser.add_argument('--init_model_path', default='./data/melanoma/init_models', type=str,
                     help='')  
 
@@ -112,7 +112,7 @@ for ki in range(config.Ks,config.Ke,config.K_step):
                             f_.truncate()
                             log_print(f_name,'hidden_dim:{} SAG Pooling_ratio:{} conv_type:{} drop_out:{}'.format(hd,sag_r,conv_type,drop_out_r))
                             log_print(f_name,"=======================FOLD {}=======================".format(fi+1))
-                            dataloader = get_dataloader(index=fi)
+                            dataloader = get_dataloader(index=fi,x_path=config.gnn_path,y_path=config.label_path,fold_path=config.fold_path)
                             model=SAG(hidden_dim=hd,SAG_ratio=sag_r,CONV_TYPE=conv_type,act_op=config.act_op,before_pooling_layer=config.before_layer,after_pooling_layer=config.after_layer,num_K=ki,n_class=config.class_num).to(device)
                             
                             if t==0 and fi==0:

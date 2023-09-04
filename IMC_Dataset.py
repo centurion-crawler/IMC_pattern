@@ -31,10 +31,8 @@ class IMC_Dataset(Dataset):
         graph_path=os.path.join(self.x_path,self.graphs[index])
         graph=torch.load(graph_path)
         label=self.labels[self.graphs[index]]
-        # print(label)
         graph.y=label
-        # print(graph.y_KRAS)
-        # return graph,label
+
         return graph,graph_path
 
     def __len__(self):
@@ -42,11 +40,11 @@ class IMC_Dataset(Dataset):
 
 
 
-def get_dataloader(index=0,seed=0):
-    train_set=IMC_Dataset(fold_index="fold{}_train".format(index))
-    val_set=IMC_Dataset(fold_index="fold{}_val".format(index))
-    test_set=IMC_Dataset(fold_index="fold{}_test".format(index))
-    all_set=IMC_Dataset(fold_index="fold{}_all".format(index))
+def get_dataloader(index,x_path,y_path,fold_path,seed=0):
+    train_set=IMC_Dataset(fold_index="fold{}_train".format(index),x_path=x_path,y_path=y_path,fold_path=fold_path)
+    val_set=IMC_Dataset(fold_index="fold{}_val".format(index),x_path=x_path,y_path=y_path,fold_path=fold_path)
+    test_set=IMC_Dataset(fold_index="fold{}_test".format(index),x_path=x_path,y_path=y_path,fold_path=fold_path)
+    all_set=IMC_Dataset(fold_index="fold{}_all".format(index),x_path=x_path,y_path=y_path,fold_path=fold_path)
     dataloader={}
     dataloader["train"]=DataLoader(train_set,batch_size=1,num_workers=0,drop_last=False,shuffle=True) # Dataloader for enumerate
     dataloader["all"]=DataLoader(all_set,batch_size=1,num_workers=0,drop_last=False,shuffle=True)

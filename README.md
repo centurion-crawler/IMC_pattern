@@ -33,6 +33,7 @@ This repo is the official code for IMC_pattern
     ```
 
 #### Training
+
 ```bash
 python -u train.py --gpu_id=0 --repeat_s=0  --repeat_e=1 --fold_s=0 --fold_e=23 \
 --convtype=SAGE --act_op=relu --hd=128 --sag_r=64 --before_layer=1 --after_layer=1 --dropout=0.25 --pool_type=sagpool \
