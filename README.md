@@ -37,7 +37,7 @@ This repo is the official code for IMC_pattern
 ```bash
 python -u train.py --gpu_id=0 --repeat_s=0  --repeat_e=1 --fold_s=0 --fold_e=23 \
 --convtype=SAGE --act_op=relu --hd=128 --sag_r=64 --before_layer=1 --after_layer=1 --dropout=0.25 --pool_type=sagpool \
---epoch=45 --early_stop=20 --ckpt_save_epoch=25 --lr=2e-4 --weight_decay=5e-5 --Ks=2 --Ke=10 --K_step=2 class_num=2 \
+--epoch=45 --early_stop=20 --ckpt_save_epoch=25 --lr=2e-4 --weight_decay=5e-5 --Ks=2 --Ke=10 --K_step=2 --class_num=2 \
 --ckpt_path=./checkpoint --res_path=./log_res --gnn_path=./data/melanoma/gnn_data  \ 
 --label_path=./data/melanoma/label_and_fold/response_label_dict.pkl --fold_path=./data/melanoma/label_and_fold/leave_one_fold_for_response.pkl
 ```
@@ -49,7 +49,7 @@ Obtain the subgraph information of the ROI to be analyzed by testing the best pe
 ```bash
 python -u test.py --gpu_id=0 --repeat_s=0  --repeat_e=1 --fold_s=0 --fold_e=23 \
 --convtype=SAGE --act_op=relu --hd=128 --sag_r=64 --before_layer=1 --after_layer=1 --dropout=0.25 --pool_type=sagpool \
---lr=2e-4 --weight_decay=5e-5 --Ks=2 --Ke=10 --K_step=2 class_num=2 \
+--lr=2e-4 --weight_decay=5e-5 --Ks=2 --Ke=10 --K_step=2 --class_num=2 \
 --ckpt_path=./checkpoint --res_path=./log_res --gnn_path=./data/melanoma/gnn_data  \ 
 --label_path=./data/melanoma/label_and_fold/response_label_dict.pkl --fold_path=./data/melanoma/label_and_fold/leave_one_fold_for_response.pkl
 ```
