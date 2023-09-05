@@ -80,6 +80,7 @@ from utils import *
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import classification_report,accuracy_score,roc_curve,auc,roc_auc_score,confusion_matrix,f1_score
 from IMC_Dataset import get_dataloader
+from tqdm import tqdm 
 
 device=torch.device("cuda:0")
 epoch = config.epoch
@@ -128,7 +129,7 @@ for ki in range(config.Ks,config.Ke,config.K_step):
                             early_stop_count=0
                             best_val_auc = 0.0 
 
-                            for k in range(epoch):
+                            for k in tqdm(range(epoch)):
                                 model.train()
                                 model.to(device)
                                 loss_sum=0.0
