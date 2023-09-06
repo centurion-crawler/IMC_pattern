@@ -224,7 +224,7 @@ for ki in range(config.Ks,config.Ke,config.K_step):
 
                             log_print(f_name,"best train loss :{:.4f}".format(best_train_loss))
                             best_p=torch.load(model_pathname)
-                            log_print(f_name,"Load best model, epoch={} train_loss={:.4f}".format(best_p["epoch"],best_p["loss"]))
+                            log_print(f_name,"Load best model, epoch={}".format(best_p["epoch"]))
                             model.load_state_dict(best_p["net"])
                             model.to(device)
 
