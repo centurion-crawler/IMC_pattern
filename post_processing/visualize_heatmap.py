@@ -87,7 +87,7 @@ for pkl in os.listdir(subgraph_dir):
         draft = cv2.circle(draft,(int(graph.pos[i][1]),int(graph.pos[i][0])),4,cell_color,-1) 
         if scores[i]>scores.mean()+scores.std():
             node_masks_List.append(i)
-            draft_h = cv2.circle(draft,(int(graph.pos[i][1]),int(graph.pos[i][0])),4,cell_color,-1) 
+            draft_h = cv2.circle(draft_h,(int(graph.pos[i][1]),int(graph.pos[i][0])),4,cell_color,-1) 
     node_mask = torch.LongTensor(node_masks_List)
     node_mask_data_pyg = Data(node_mask=node_mask)
 
