@@ -59,8 +59,8 @@ python -u test.py --gpu_id=0 --repeat_s=0  --repeat_e=1 --fold_s=0 --fold_e=23 \
     ```bash
     cd ./post_processing
     python -u visualize_heatmap.py \
-    --graph_path=../log_res/sagpool/Tuning_hd_64_convtype_SAGE_pool_ratio_0.015625_lsim_0.5_act_op_relu_K_2_bl_1_al_1/subgraph \
-    --subgraph_path=../data/melanoma/gnn_data \
+    --graph_path=../data/melanoma/gnn_data \
+    --subgraph_path=../log_res/sagpool/Tuning_hd_64_convtype_SAGE_pool_ratio_0.015625_lsim_0.5_act_op_relu_K_2_bl_1_al_1/subgraph \
     --visualize_cell_path=../data/melanoma/vis_cell_type \
     --res_path=../results/sagpool/Tuning_hd_64_convtype_SAGE_pool_ratio_0.015625_lsim_0.5_act_op_relu_K_2_bl_1_al_1 \
     --gpu_id=0 \
