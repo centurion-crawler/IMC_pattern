@@ -69,7 +69,7 @@ python -u test.py --gpu_id=0 --repeat_s=0  --repeat_e=1 --fold_s=0 --fold_e=23 \
   * [UTAG](https://github.com/ElementoLab/utag) Domain generation
     ```bash
     cd ./post_processing
-    python -u gen_utag --data_root=../data/melanoma --res_utag_name=utag_results_dist10_leiden.h5ad
+    python -u gen_utag.py --data_root=../data/melanoma --res_utag_name=utag_results_dist10_leiden.h5ad
     ```
   *  Analysis 
     references Analysis process [analysis.ipynb](./post_processing/analysis.ipynb)
