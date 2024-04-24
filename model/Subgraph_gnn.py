@@ -136,7 +136,7 @@ class SAG(torch.nn.Module):
             if h_ is None:
                 h_ = x
             else:
-                h_ = torch.cat([h_1,x],axis=1)
+                h_ = torch.cat([h,x],axis=1)
         
         return h_ 
 
